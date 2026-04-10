@@ -16,7 +16,11 @@ def main():
         elif not arg.startswith('-'):
             path = arg
 
-    entries = sorted(os.listdir(path), key=str.casefold)
+    try:
+        entries = sorted(os.listdir(path), key=str.casefold)
+    except OSError as e:
+        print(f"ls: {path}: {e.strerror}", file=sys.stderr)
+        sys.exit(1)
 
     if show_all:
         print('.')

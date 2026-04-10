@@ -12,8 +12,15 @@ for (const arg of args) {
   else if (!arg.startsWith('-')) targetPath = arg;
 }
 
-const entries = fs.readdirSync(targetPath)
-  .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+let entries;
+try {
+  entries = fs.readdirSync(targetPath)
+    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+} catch (err) {
+  const msg = err.code === 'EACCES' ? 'Permission denied' : 'No such file or directory';
+  process.stderr.write(`ls: ${targetPath}: ${msg}\n`);
+  process.exit(1);
+}
 
 if (showAll) {
   console.log('.');

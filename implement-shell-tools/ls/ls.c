@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <errno.h>
 
 #define MAX_ENTRIES 1024
 
@@ -23,7 +24,10 @@ int main(int argc, char *argv[]) {
     }
 
     DIR *dir = opendir(path);
-    if (!dir) { perror(path); return 1; }
+    if (!dir) {
+        fprintf(stderr, "ls: %s: %s\n", path, strerror(errno));
+        return 1;
+    }
 
     char *entries[MAX_ENTRIES];
     int count = 0;
