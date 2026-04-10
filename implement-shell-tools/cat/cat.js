@@ -13,12 +13,15 @@ for (const arg of args) {
   else files.push(arg);
 }
 
-for (const filepath of files) {
-  const content = fs.readFileSync(filepath, 'utf8');
-  const lines = content.split('\n');
-  // If file ends with \n, split produces a trailing '' — skip it
-  if (lines[lines.length - 1] === '') lines.pop();
+function osError(err) {
+  if (err.code === 'EACCES') return 'Permission denied';
+  if (err.code === 'ENOENT') return 'No such file or directory';
+  return err.message;
+}
 
+function processContent(content) {
+  const lines = content.split('\n');
+  if (lines[lines.length - 1] === '') lines.pop();
   let lineNum = 0;
   for (const line of lines) {
     if (flagB) {
@@ -35,4 +38,23 @@ for (const filepath of files) {
       process.stdout.write(line + '\n');
     }
   }
+}
+
+if (files.length === 0) {
+  let content = '';
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', chunk => { content += chunk; });
+  process.stdin.on('end', () => { processContent(content); });
+} else {
+  let exitCode = 0;
+  for (const filepath of files) {
+    try {
+      const content = fs.readFileSync(filepath, 'utf8');
+      processContent(content);
+    } catch (err) {
+      process.stderr.write(`cat: ${filepath}: ${osError(err)}\n`);
+      exitCode = 1;
+    }
+  }
+  process.exit(exitCode);
 }
