@@ -52,4 +52,15 @@ for (const filepath of files) {
 
 if (files.length > 1) {
   printRow(totalLines, totalWords, totalChars, 'total');
+} else if (files.length === 0) {
+  // Read from stdin
+  let content = '';
+  process.stdin.on('data', chunk => content += chunk);
+  process.stdin.on('end', () => {
+      const lines = content.split('\n').length - 1;
+      const text = content.toString('utf8').trim();
+      const words = text === '' ? 0 : text.split(/\s+/).length;
+      const chars = content.length;
+      printRow(lines, words, chars, '');
+    });
 }
