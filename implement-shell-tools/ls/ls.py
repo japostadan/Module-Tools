@@ -2,23 +2,45 @@
 import sys
 import os
 
+USAGE = "usage: ls [-@ABCFGHILOPRSTUWXabcdefghiklmnopqrstuvwxy1%,] [--color=when] [-D format] [file ...]"
+KNOWN_FLAGS = set('1a')
 
-def main():
-    args = sys.argv[1:]
+
+def parse_args(args):
     show_all = False
-    show_one_per_line = False
+    one_per_line = False
     path = '.'
 
     for arg in args:
-        if arg == '-1':
-            show_one_per_line = True
-        elif arg == '-a':
-            show_all = True
-        elif not arg.startswith('-'):
-            path = arg
+        if arg.startswith('-') and len(arg) > 1:
+            for ch in arg[1:]:
+                if ch == '1':
+                    one_per_line = True
+                elif ch == 'a':
+                    show_all = True
+                elif ch not in KNOWN_FLAGS:
+                    print(f"ls: invalid option -- {ch}", file=sys.stderr)
+                    print(USAGE, file=sys.stderr)
+                    sys.exit(1)
         else:
-            print(f"ls: invalid option -- '{arg}'", file=sys.stderr)
-            sys.exit(1)
+            path = arg
+
+    return show_all, one_per_line, path
+
+
+def print_entry(name, one_per_line):
+    if one_per_line:
+        print(name)
+    else:
+        print(name, end='\t')
+
+
+def main():
+    show_all, one_per_line, path = parse_args(sys.argv[1:])
+
+    if os.path.isfile(path):
+        print(path)
+        sys.exit(0)
 
     try:
         entries = sorted(os.listdir(path), key=str.casefold)
@@ -30,14 +52,12 @@ def main():
         print('.')
         print('..')
         for entry in entries:
-            print(entry)
+            print_entry(entry, one_per_line)
     else:
         for entry in entries:
             if not entry.startswith('.'):
-                if show_one_per_line:
-                    print(entry)
-                else:
-                    print(entry, end='\t')
+                print_entry(entry, one_per_line)
+
 
 if __name__ == '__main__':
     main()
