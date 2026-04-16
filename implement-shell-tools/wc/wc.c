@@ -1,9 +1,10 @@
 /* Usage: ./wc [-l] [-w] [-c] file1 [file2 ...]
- * Compile: gcc -o wc wc.c
+ * Compile: gcc -Wall -Wextra -Werror -o wc wc.c
  */
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 typedef struct { long lines, words, chars; } Counts;
 
@@ -66,6 +67,13 @@ int main(int argc, char *argv[]) {
     Counts total = {0, 0, 0};
 
     for (int i = 0; i < nfiles; i++) {
+        struct stat st;
+        if (stat(files[i], &st) == 0 && S_ISDIR(st.st_mode)) {
+            fprintf(stderr, "wc: %s: read: Is a directory\n", files[i]);
+            exit_code = 1;
+            continue;
+        }
+
         FILE *f = fopen(files[i], "rb");
         if (!f) {
             fprintf(stderr, "wc: %s: open: %s\n", files[i], strerror(errno));

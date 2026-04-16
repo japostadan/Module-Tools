@@ -57,6 +57,7 @@ int main(int argc, char *argv[]) {
                 }
             }
 
+            line_num = 0;
             process_stream(f, flag_n, flag_b, &line_num);
 
             if (f != stdin)

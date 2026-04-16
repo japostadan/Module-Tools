@@ -1,5 +1,5 @@
 /* Usage: ./ls [-1] [-a] [path]
- * Compile: gcc -o ls ls.c
+ * Compile: gcc -Wall -Wextra -Werror -o ls ls.c
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,11 @@
 #define MAX_ENTRIES 1024
 
 static int cmp_casefold(const void *a, const void *b) {
-    return strcasecmp(*(const char **)a, *(const char **)b);
+    return strcasecmp(*(const char *const *)a, *(const char *const *)b);
+}
+
+static void free_entries(char **entries, size_t count) {
+    for (size_t i = 0; i < count; i++) free(entries[i]);
 }
 
 int main(int argc, char *argv[]) {
@@ -18,9 +22,16 @@ int main(int argc, char *argv[]) {
     const char *path = ".";
 
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-a") == 0) show_all = 1;
-        else if (strcmp(argv[i], "-1") == 0) { /* default */ }
-        else if (argv[i][0] != '-') path = argv[i];
+        if (strcmp(argv[i], "-a") == 0)
+			show_all = 1;
+        else if (strcmp(argv[i], "-1") == 0);
+        else if (argv[i][0] != '-')
+			path = argv[i];
+        else {
+            fprintf(stderr, "ls: illegal option -- %c\n", argv[i][1]);
+            fprintf(stderr, "usage: ls [-1a] [path]\n");
+            return 1;
+        }
     }
 
     DIR *dir = opendir(path);
@@ -30,13 +41,28 @@ int main(int argc, char *argv[]) {
     }
 
     char *entries[MAX_ENTRIES];
-    int count = 0;
+    size_t count = 0;
     struct dirent *entry;
 
     while ((entry = readdir(dir)) != NULL) {
         const char *name = entry->d_name;
         if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) continue;
-        entries[count++] = strdup(name);
+
+        if (count >= MAX_ENTRIES) {
+            fprintf(stderr, "ls: too many entries (max %d)\n", MAX_ENTRIES);
+            closedir(dir);
+            free_entries(entries, count);
+            return 1;
+        }
+
+        entries[count] = strdup(name);
+        if (!entries[count]) {
+            perror("ls: strdup");
+            closedir(dir);
+            free_entries(entries, count);
+            return 1;
+        }
+        count++;
     }
     closedir(dir);
 
@@ -45,13 +71,13 @@ int main(int argc, char *argv[]) {
     if (show_all) {
         puts(".");
         puts("..");
-        for (int i = 0; i < count; i++) puts(entries[i]);
+        for (size_t i = 0; i < count; i++) puts(entries[i]);
     } else {
-        for (int i = 0; i < count; i++) {
+        for (size_t i = 0; i < count; i++) {
             if (entries[i][0] != '.') puts(entries[i]);
         }
     }
 
-    for (int i = 0; i < count; i++) free(entries[i]);
+    free_entries(entries, count);
     return 0;
 }
