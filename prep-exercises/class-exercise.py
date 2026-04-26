@@ -31,11 +31,11 @@ class Person:
 
 imran = Person("Imran", 22, "Ubuntu")
 print(imran.name)
-print(imran.address)
+#print(imran.address)
 
 eliza = Person("Eliza", 34, "Arch Linux")
 print(eliza.name)
-print(eliza.address)
+#Print(eliza.address)
 
 #This code is saying: “There’s a category of object called Person. Every instance of Person has a name, an age, and a preferred_operating_system”.
 #It then makes two instances of Person, and uses them.
@@ -50,13 +50,22 @@ def is_adult(person: Person) -> bool:
 
 print(is_adult(imran))
 
+#.venv ❮ python -m mypy class-exercise.py
+#Success: no issues found in 1 source file
+
 #Exercise
 #Add the is_adult code to the file you saved earlier.
 #Run it through mypy - notice that no errors are reported - mypy understands that Person has a property named age so is happy with the function.
 #Write a new function in the file that accepts a Person as a parameter and tries to access a property that doesn’t exist. 
+def get_address(person: Person) -> str:
+    return person.address
+
 #Run it through mypy and check that it does report an error.
 
-# Here is the error
+#.venv ❮ python -m mypy class-exercise.py
+#class-exercise.py:61: error: "Person" has no attribute "address"  [attr-defined]
+#Found 1 error in 1 file (checked 1 source file)
+
 #.venv ❮ python -m mypy class-exercise.py
 #class-exercise.py:34: error: "Person" has no attribute "address"  [attr-defined]
 #class-exercise.py:38: error: "Person" has no attribute "address"  [attr-defined]
