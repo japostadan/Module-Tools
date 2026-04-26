@@ -49,9 +49,8 @@ def main():
         sys.exit(1)
 
     if show_all:
-        print('.')
-        print('..')
-        for entry in entries:
+        all_entries = entries + ['.','..']
+        for entry in sorted(all_entries):
             print_entry(entry, one_per_line)
     else:
         for entry in entries:
