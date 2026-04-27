@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Dict, Tuple
+from itertools import permutations
 
 class OperatingSystem(Enum):
     MACOS = "macOS"
@@ -12,7 +12,7 @@ class Person:
     name: str
     age: int
     # Sorted in order of preference, most preferred is first.
-    preferred_operating_system: Tuple[OperatingSystem, ...]
+    preferred_operating_system: tuple[OperatingSystem, ...]
 
 
 @dataclass(frozen=True)
@@ -25,45 +25,16 @@ class Laptop:
 
 
 def sadness(person: Person, laptop: Laptop) -> int:
-    try:
-        return person.preferred_operating_system.index(laptop.operating_system)
-    except ValueError:
-        return 100
+    prefs = person.preferred_operating_system
+    return prefs.index(laptop.operating_system) if laptop.operating_system in prefs else 100
 
 
-def allocate_laptops(people: List[Person], laptops: List[Laptop]) -> Dict[Person, Laptop]:
-    best_allocation = None
-    best_total_sadness = float("inf")
-
-    def backtrack(i: int, used: set, current: Dict[Person, Laptop], total_sadness: int):
-        nonlocal best_allocation, best_total_sadness
-
-        # all people assigned
-        if i == len(people):
-            if total_sadness < best_total_sadness:
-                best_total_sadness = total_sadness
-                best_allocation = current.copy()
-            return
-
-        person = people[i]
-
-        for j, laptop in enumerate(laptops):
-            if j in used:
-                continue
-
-            s = sadness(person, laptop)
-
-            used.add(j)
-            current[person] = laptop
-
-            backtrack(i + 1, used, current, total_sadness + s)
-
-            used.remove(j)
-            del current[person]
-
-    backtrack(0, set(), {}, 0)
-
-    return best_allocation
+def allocate_laptops(people: list[Person], laptops: list[Laptop]) -> dict[Person, Laptop]:
+    best_assignment = min(
+        permutations(laptops, len(people)),
+        key=lambda assignment: sum(sadness(p, l) for p, l in zip(people, assignment)),
+    )
+    return dict(zip(people, best_assignment))
 
 
 if __name__ == "__main__":
