@@ -19,8 +19,8 @@ class Person:
     def is_adult(self) -> bool:
         return self.age() >= 18
 
-imran = Person("Imran", 22, "Ubuntu")  # We can call this constructor - @dataclass generated it for us.
+imran = Person("Imran", date(2001,1,2), "Ubuntu")  # We can call this constructor - @dataclass generated it for us.
 print(imran)  # Prints Person(name='Imran', age=22, preferred_operating_system='Ubuntu')
 
-imran2 = Person("Imran", 22, "Ubuntu")
+imran2 = Person("Imran", date(2001,1,2), "Ubuntu")
 print(imran == imran2)  # Prints True
