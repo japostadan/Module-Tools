@@ -3,6 +3,7 @@
 set -euo pipefail
 
 # TODO: Write a command to output the number of lines, words, and characters in all of the files inside the helper-files directory.
+wc ../helper-files/*
 # The output should be something like:
 #        1       4      20 ../helper-files/helper-1.txt
 #        1       7      39 ../helper-files/helper-2.txt
