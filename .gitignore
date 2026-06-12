@@ -1,1 +1,6 @@
 node_modules
+NOTE.md
+PR.md
+.venv
+.mypy_cache
+CLAUDE.md
